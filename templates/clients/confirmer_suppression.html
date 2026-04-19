@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Supprimer {{ client.nom_complet }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+      <div class="card-hotel p-4 text-center">
+        <div class="mb-4">
+          <div style="width:80px;height:80px;background:#fff5f5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto">
+            <i class="bi bi-exclamation-triangle text-danger fs-2"></i>
+          </div>
+        </div>
+        <h4 class="navy-text">Supprimer ce client ?</h4>
+        <p class="text-muted mb-4">
+          Supprimer <strong>{{ client.nom_complet }}</strong> ({{ client.email }}) ?<br>
+          <span class="text-danger small">Toutes ses réservations seront également supprimées.</span>
+        </p>
+        <div class="d-flex gap-3 justify-content-center">
+          <a href="{% url 'clients:liste' %}" class="btn btn-outline-secondary px-4">Annuler</a>
+          <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger px-4">
+              <i class="bi bi-trash me-1"></i>Supprimer
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
