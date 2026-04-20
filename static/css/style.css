@@ -1,0 +1,402 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   HôtelLuxe – Feuille de styles principale
+   Palette : Navy #1a1a2e | Gold #c9a96e | Light gold #f0d9b5
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --navy:        #1a1a2e;
+  --navy-mid:    #16213e;
+  --navy-light:  #0f3460;
+  --gold:        #c9a96e;
+  --gold-light:  #f0d9b5;
+  --gold-dark:   #a07840;
+  --white:       #ffffff;
+  --gray-soft:   #f8f9fb;
+  --border:      #e8e0d5;
+  --text-muted:  #7a7a8c;
+  --radius:      12px;
+  --shadow:      0 4px 20px rgba(26,26,46,.12);
+  --shadow-lg:   0 8px 40px rgba(26,26,46,.18);
+}
+
+/* ── Reset / base ──────────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--gray-soft);
+  color: #2d2d3d;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5 { font-family: 'Playfair Display', serif; }
+
+.gold-text { color: var(--gold) !important; }
+.navy-text { color: var(--navy) !important; }
+
+/* ── Navbar ────────────────────────────────────────────────────────────── */
+.navbar-hotel {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  border-bottom: 2px solid var(--gold);
+  padding: .75rem 0;
+  box-shadow: var(--shadow);
+}
+
+.brand-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.navbar-hotel .nav-link {
+  color: rgba(255,255,255,.8) !important;
+  font-weight: 500;
+  font-size: .9rem;
+  padding: .5rem .9rem;
+  border-radius: 8px;
+  transition: all .25s;
+}
+
+.navbar-hotel .nav-link:hover,
+.navbar-hotel .nav-link.active {
+  color: var(--gold) !important;
+  background: rgba(201,169,110,.1);
+}
+
+/* ── Barre de recherche ────────────────────────────────────────────────── */
+.search-form { min-width: 280px; }
+
+.search-input {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(201,169,110,.4);
+  color: #fff;
+  border-radius: 8px 0 0 8px !important;
+  font-size: .88rem;
+  transition: all .25s;
+}
+
+.search-input::placeholder { color: rgba(255,255,255,.5); }
+.search-input:focus {
+  background: rgba(255,255,255,.15);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,169,110,.2);
+  color: #fff;
+}
+
+.btn-search {
+  background: var(--gold);
+  border: 1px solid var(--gold);
+  color: var(--navy);
+  border-radius: 0 8px 8px 0 !important;
+  font-weight: 600;
+  transition: all .25s;
+}
+
+.btn-search:hover { background: var(--gold-dark); color: #fff; }
+
+/* ── Avatar & menu utilisateur ────────────────────────────────────────── */
+.avatar-circle {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: var(--navy);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .8rem;
+  flex-shrink: 0;
+}
+
+.btn-user {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(201,169,110,.3);
+  color: rgba(255,255,255,.9);
+  border-radius: 10px;
+  padding: .4rem .9rem;
+  font-size: .88rem;
+}
+
+.btn-user:hover, .btn-user:focus {
+  background: rgba(201,169,110,.15);
+  color: var(--white);
+  border-color: var(--gold);
+}
+
+.dropdown-hotel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  min-width: 200px;
+}
+
+.dropdown-hotel .dropdown-item { font-size: .9rem; padding: .55rem 1rem; }
+.dropdown-hotel .dropdown-item:hover { background: var(--gray-soft); color: var(--navy); }
+
+/* ── Bouton Gold ───────────────────────────────────────────────────────── */
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: var(--navy) !important;
+  border: none;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all .25s;
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, var(--gold-dark), #8a6030);
+  color: #fff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(201,169,110,.4);
+}
+
+.btn-navy {
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all .25s;
+}
+
+.btn-navy:hover { background: var(--navy-light); color: #fff; transform: translateY(-1px); }
+
+/* ── Contenu principal ────────────────────────────────────────────────── */
+.main-content { flex: 1; padding: 2rem 1.5rem; }
+
+/* ── Cartes statistiques (dashboard) ─────────────────────────────────── */
+.stat-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--gold);
+  transition: all .3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 80px; height: 80px;
+  background: var(--gold);
+  opacity: .06;
+  border-radius: 50%;
+}
+
+.stat-icon {
+  width: 52px; height: 52px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+}
+
+.stat-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1;
+}
+
+.stat-label { color: var(--text-muted); font-size: .85rem; font-weight: 500; }
+
+/* ── Cartes génériques ────────────────────────────────────────────────── */
+.card-hotel {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transition: all .3s;
+}
+
+.card-hotel:hover { box-shadow: var(--shadow-lg); }
+
+.card-header-hotel {
+  background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+  color: var(--white);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 1rem 1.5rem;
+  border-bottom: 2px solid var(--gold);
+}
+
+/* ── Carte chambre ────────────────────────────────────────────────────── */
+.room-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: all .3s;
+  height: 100%;
+}
+
+.room-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--gold);
+}
+
+.room-card-img {
+  width: 100%; height: 200px;
+  object-fit: cover;
+}
+
+.room-card-img-placeholder {
+  width: 100%; height: 200px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; color: var(--gold);
+}
+
+.room-type-badge {
+  background: var(--gold);
+  color: var(--navy);
+  font-weight: 700;
+  font-size: .75rem;
+  padding: .3rem .7rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.room-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.room-price span { font-size: .8rem; color: var(--text-muted); font-family: 'Inter', sans-serif; }
+
+/* ── Tableau ──────────────────────────────────────────────────────────── */
+.table-hotel thead {
+  background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+  color: var(--gold);
+}
+
+.table-hotel thead th { font-weight: 600; font-size: .85rem; letter-spacing: .3px; border: none; padding: 1rem; }
+.table-hotel tbody tr { transition: background .2s; }
+.table-hotel tbody tr:hover { background: rgba(201,169,110,.06); }
+.table-hotel tbody td { vertical-align: middle; padding: .85rem 1rem; border-bottom: 1px solid var(--border); }
+
+/* ── Formulaires ──────────────────────────────────────────────────────── */
+.form-hotel {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2rem;
+  border: 1px solid var(--border);
+}
+
+.form-control, .form-select {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: .6rem 1rem;
+  font-size: .92rem;
+  transition: all .25s;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,169,110,.2);
+}
+
+.form-label { font-weight: 600; color: var(--navy); font-size: .88rem; margin-bottom: .4rem; }
+
+/* ── Page de connexion ────────────────────────────────────────────────── */
+.auth-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem;
+}
+
+.auth-card {
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  padding: 2.5rem;
+  width: 100%; max-width: 440px;
+}
+
+.auth-logo { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--navy); }
+
+/* ── Badges de statut ─────────────────────────────────────────────────── */
+.badge { border-radius: 6px; font-weight: 600; font-size: .78rem; padding: .4em .75em; }
+
+/* ── Page titre ───────────────────────────────────────────────────────── */
+.page-header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+  color: var(--white);
+  padding: 1.5rem 2rem;
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+  border-bottom: 3px solid var(--gold);
+  box-shadow: var(--shadow);
+}
+
+.page-header h1 { font-size: 1.6rem; margin: 0; }
+.page-header .breadcrumb { font-size: .85rem; opacity: .75; margin: 0; }
+.page-header .breadcrumb-item+.breadcrumb-item::before { color: var(--gold); }
+
+/* ── Pagination ───────────────────────────────────────────────────────── */
+.pagination .page-link {
+  color: var(--navy);
+  border: 1.5px solid var(--border);
+  border-radius: 8px !important;
+  margin: 0 2px;
+  font-weight: 500;
+}
+
+.pagination .page-link:hover { background: var(--gold-light); border-color: var(--gold); color: var(--navy); }
+.pagination .page-item.active .page-link {
+  background: var(--navy);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────── */
+.footer-hotel {
+  background: var(--white);
+  border-top: 2px solid var(--border);
+  margin-top: auto;
+}
+
+/* ── Alertes ──────────────────────────────────────────────────────────── */
+.alert { border-radius: var(--radius); border: none; border-left: 4px solid; }
+.alert-success { border-left-color: #28a745; background: #f0fff4; }
+.alert-danger  { border-left-color: #dc3545; background: #fff5f5; }
+.alert-warning { border-left-color: #ffc107; background: #fffbf0; }
+.alert-info    { border-left-color: #17a2b8; background: #f0faff; }
+
+/* ── Recherche page ───────────────────────────────────────────────────── */
+.search-result-section { margin-bottom: 2rem; }
+.search-result-item {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  margin-bottom: .6rem;
+  transition: all .2s;
+  display: flex; align-items: center; gap: 1rem;
+  text-decoration: none; color: inherit;
+}
+
+.search-result-item:hover {
+  border-color: var(--gold);
+  box-shadow: var(--shadow);
+  transform: translateX(4px);
+  color: inherit;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .search-form { min-width: auto; width: 100%; margin: .5rem 0; }
+  .main-content { padding: 1rem; }
+  .stat-value { font-size: 1.5rem; }
+}

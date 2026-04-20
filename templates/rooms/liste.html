@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}Chambres{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h1><i class="bi bi-door-closed me-2"></i>Chambres</h1>
+        <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}" class="text-white-50">Tableau de bord</a></li>
+          <li class="breadcrumb-item active text-white">{{ total }} chambre{{ total|pluralize }}</li>
+        </ol></nav>
+      </div>
+      {% if request.user.profile.is_admin %}
+      <a href="{% url 'rooms:ajouter' %}" class="btn btn-gold">
+        <i class="bi bi-plus-circle me-1"></i>Ajouter une chambre
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="card-hotel p-3 mb-4">
+    <form method="GET" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small mb-1">Type</label>
+        {{ form.type }}
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Prix min</label>
+        {{ form.prix_min }}
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Prix max</label>
+        {{ form.prix_max }}
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Disponibilité</label>
+        {{ form.disponible }}
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-gold flex-fill">
+          <i class="bi bi-funnel me-1"></i>Filtrer
+        </button>
+        <a href="{% url 'rooms:liste' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-x-circle"></i>
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Grille de chambres -->
+  <div class="row g-4">
+    {% for chambre in chambres %}
+    <div class="col-md-6 col-lg-4">
+      <div class="room-card">
+        {% if chambre.image %}
+          <img src="{{ chambre.image.url }}" alt="Chambre {{ chambre.numero }}" class="room-card-img">
+        {% else %}
+          <div class="room-card-img-placeholder">
+            <i class="bi bi-door-closed"></i>
+          </div>
+        {% endif %}
+
+        <div class="p-3">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <span class="room-type-badge">{{ chambre.get_type_display }}</span>
+              <h6 class="mt-2 mb-0 navy-text fw-bold">Chambre {{ chambre.numero }}</h6>
+            </div>
+            <span class="badge bg-{{ chambre.statut_badge }}">{{ chambre.statut_label }}</span>
+          </div>
+
+          <div class="room-price my-2">
+            {{ chambre.prix|floatformat:0 }} MAD<span>/nuit</span>
+          </div>
+
+          <div class="d-flex gap-3 text-muted small mb-3">
+            <span><i class="bi bi-people me-1"></i>{{ chambre.capacite }} pers.</span>
+            <span><i class="bi bi-layers me-1"></i>Étage {{ chambre.etage }}</span>
+            <span><i class="bi bi-aspect-ratio me-1"></i>{{ chambre.superficie }} m²</span>
+          </div>
+
+          {% if chambre.description %}
+          <p class="text-muted small mb-3" style="line-height:1.4">
+            {{ chambre.description|truncatechars:90 }}
+          </p>
+          {% endif %}
+
+          <div class="d-flex gap-2">
+            <a href="{% url 'rooms:detail' chambre.pk %}" class="btn btn-sm btn-navy flex-fill">
+              <i class="bi bi-eye me-1"></i>Détails
+            </a>
+            {% if chambre.disponible %}
+            <a href="{% url 'reservations:ajouter' %}?chambre={{ chambre.pk }}" class="btn btn-sm btn-gold flex-fill">
+              <i class="bi bi-calendar-plus me-1"></i>Réserver
+            </a>
+            {% endif %}
+            {% if request.user.profile.is_admin %}
+            <a href="{% url 'rooms:modifier' chambre.pk %}" class="btn btn-sm btn-outline-secondary"
+               data-bs-toggle="tooltip" title="Modifier">
+              <i class="bi bi-pencil"></i>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+      <i class="bi bi-door-open fs-1 text-muted"></i>
+      <h5 class="mt-3 text-muted">Aucune chambre trouvée</h5>
+      {% if request.user.profile.is_admin %}
+      <a href="{% url 'rooms:ajouter' %}" class="btn btn-gold mt-2">
+        <i class="bi bi-plus me-1"></i>Ajouter la première chambre
+      </a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if chambres.has_other_pages %}
+  <nav class="mt-4 d-flex justify-content-center">
+    <ul class="pagination">
+      {% if chambres.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ chambres.previous_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">
+          <i class="bi bi-chevron-left"></i>
+        </a>
+      </li>
+      {% endif %}
+      {% for num in chambres.paginator.page_range %}
+      <li class="page-item {% if chambres.number == num %}active{% endif %}">
+        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+      </li>
+      {% endfor %}
+      {% if chambres.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ chambres.next_page_number }}">
+          <i class="bi bi-chevron-right"></i>
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

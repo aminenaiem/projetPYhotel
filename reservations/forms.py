@@ -1,3 +1,6 @@
+"""
+Formulaires pour la gestion des réservations
+"""
 from django import forms
 from django.core.exceptions import ValidationError
 from datetime import date
@@ -5,15 +8,20 @@ from .models import Reservation
 from rooms.models import Chambre
 from clients.models import Client
 
+
 class ReservationForm(forms.ModelForm):
     class Meta:
         model = Reservation
-        fields = ['chambre', 'client', 'date_checkin', 'date_checkout']
+        fields = ['chambre', 'client', 'date_checkin', 'date_checkout',
+                  'statut', 'nb_personnes', 'notes']
         labels = {
             'chambre': 'Chambre',
             'client': 'Client',
             'date_checkin': "Date d'arrivée",
             'date_checkout': 'Date de départ',
+            'statut': 'Statut',
+            'nb_personnes': 'Nombre de personnes',
+            'notes': 'Notes complémentaires',
         }
         widgets = {
             'date_checkin': forms.DateInput(
@@ -22,18 +30,24 @@ class ReservationForm(forms.ModelForm):
             'date_checkout': forms.DateInput(
                 attrs={'type': 'date', 'class': 'form-control'}
             ),
+            'notes': forms.Textarea(attrs={'rows': 3}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['chambre'].queryset = Chambre.objects.all()
+        # Seules les chambres disponibles pour nouvelles réservations
+        if not self.instance.pk:
+            self.fields['chambre'].queryset = Chambre.objects.filter(disponible=True)
+        else:
+            self.fields['chambre'].queryset = Chambre.objects.all()
+
         self.fields['client'].queryset = Client.objects.all().order_by('nom', 'prenom')
 
         for name, field in self.fields.items():
             if name not in ('date_checkin', 'date_checkout'):
                 if isinstance(field.widget, forms.Select):
                     field.widget.attrs.update({'class': 'form-select'})
-                else:
+                elif not isinstance(field.widget, forms.CheckboxInput):
                     field.widget.attrs.update({'class': 'form-control'})
 
     def clean(self):
@@ -49,8 +63,10 @@ class ReservationForm(forms.ModelForm):
                 raise ValidationError("La date d'arrivée ne peut pas être dans le passé.")
 
         if chambre and checkin and checkout:
+            # Vérification de disponibilité
             qs = Reservation.objects.filter(
                 chambre=chambre,
+                statut__in=['en_attente', 'confirmee'],
                 date_checkin__lt=checkout,
                 date_checkout__gt=checkin,
             )

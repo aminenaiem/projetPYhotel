@@ -3,8 +3,9 @@ from .models import Reservation
 
 @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'client', 'chambre', 'date_checkin', 'date_checkout', 'prix_total')
-    list_filter = ('date_checkin',)
+    list_display = ('pk', 'client', 'chambre', 'date_checkin', 'date_checkout', 'statut', 'prix_total', 'nb_nuits')
+    list_filter = ('statut', 'chambre__type')
     search_fields = ('client__nom', 'client__prenom', 'chambre__numero')
+    list_editable = ('statut',)
     date_hierarchy = 'date_checkin'
-    ordering = ('-id',)
+    ordering = ('-created_at',)

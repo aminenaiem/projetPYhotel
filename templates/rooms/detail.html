@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Chambre {{ chambre.numero }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h1><i class="bi bi-door-closed me-2"></i>Chambre {{ chambre.numero }}</h1>
+        <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}" class="text-white-50">Tableau de bord</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'rooms:liste' %}" class="text-white-50">Chambres</a></li>
+          <li class="breadcrumb-item active text-white">{{ chambre.numero }}</li>
+        </ol></nav>
+      </div>
+      <div class="d-flex gap-2">
+        {% if chambre.disponible %}
+        <a href="{% url 'reservations:ajouter' %}?chambre={{ chambre.pk }}" class="btn btn-gold">
+          <i class="bi bi-calendar-plus me-1"></i>Réserver
+        </a>
+        {% endif %}
+        {% if request.user.profile.is_admin %}
+        <a href="{% url 'rooms:modifier' chambre.pk %}" class="btn btn-outline-light">
+          <i class="bi bi-pencil me-1"></i>Modifier
+        </a>
+        <a href="{% url 'rooms:supprimer' chambre.pk %}" class="btn btn-outline-danger">
+          <i class="bi bi-trash me-1"></i>Supprimer
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Image & Infos principales -->
+    <div class="col-lg-5">
+      <div class="card-hotel overflow-hidden">
+        {% if chambre.image %}
+          <img src="{{ chambre.image.url }}" alt="Chambre {{ chambre.numero }}" class="w-100" style="height:300px;object-fit:cover">
+        {% else %}
+          <div class="room-card-img-placeholder" style="height:300px">
+            <i class="bi bi-door-closed" style="font-size:4rem"></i>
+          </div>
+        {% endif %}
+        <div class="p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="room-type-badge">{{ chambre.get_type_display }}</span>
+            <span class="badge bg-{{ chambre.statut_badge }} fs-6 px-3">{{ chambre.statut_label }}</span>
+          </div>
+          <div class="room-price mb-3">{{ chambre.prix|floatformat:2 }} MAD<span>/nuit</span></div>
+          <hr>
+          <div class="row g-3 text-center">
+            <div class="col-4">
+              <div class="fw-bold navy-text">{{ chambre.capacite }}</div>
+              <div class="text-muted small"><i class="bi bi-people me-1"></i>Personnes</div>
+            </div>
+            <div class="col-4">
+              <div class="fw-bold navy-text">{{ chambre.etage }}</div>
+              <div class="text-muted small"><i class="bi bi-layers me-1"></i>Étage</div>
+            </div>
+            <div class="col-4">
+              <div class="fw-bold navy-text">{{ chambre.superficie }}</div>
+              <div class="text-muted small"><i class="bi bi-aspect-ratio me-1"></i>m²</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Détails & réservations -->
+    <div class="col-lg-7">
+      <div class="card-hotel p-4 mb-4">
+        <h5 class="navy-text mb-3"><i class="bi bi-info-circle me-2 gold-text"></i>Description</h5>
+        <p class="text-muted" style="line-height:1.7">
+          {{ chambre.description|default:"Aucune description disponible."|linebreaks }}
+        </p>
+        <hr>
+        <div class="row g-2 small text-muted">
+          <div class="col-6"><strong>Numéro :</strong> {{ chambre.numero }}</div>
+          <div class="col-6"><strong>Type :</strong> {{ chambre.get_type_display }}</div>
+          <div class="col-6"><strong>Prix/nuit :</strong> {{ chambre.prix }} MAD</div>
+          <div class="col-6"><strong>Ajoutée le :</strong> {{ chambre.created_at|date:"d/m/Y" }}</div>
+        </div>
+      </div>
+
+      <!-- Réservations récentes pour cette chambre -->
+      <div class="card-hotel">
+        <div class="card-header-hotel">
+          <i class="bi bi-calendar-check me-2"></i>Réservations récentes
+        </div>
+        <div class="p-0">
+          <table class="table table-hotel mb-0">
+            <thead>
+              <tr><th>Client</th><th>Arrivée</th><th>Départ</th><th>Nuits</th><th>Statut</th></tr>
+            </thead>
+            <tbody>
+              {% for r in reservations %}
+              <tr>
+                <td><a href="{% url 'clients:detail' r.client.pk %}" class="text-decoration-none fw-bold">{{ r.client.nom_complet }}</a></td>
+                <td>{{ r.date_checkin|date:"d/m/Y" }}</td>
+                <td>{{ r.date_checkout|date:"d/m/Y" }}</td>
+                <td><span class="badge bg-secondary">{{ r.nb_nuits }}n</span></td>
+                <td><span class="badge bg-{{ r.badge_statut }}">{{ r.get_statut_display }}</span></td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" class="text-center text-muted py-3">Aucune réservation pour cette chambre</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

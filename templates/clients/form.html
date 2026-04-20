@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}{{ titre }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="page-header">
+    <h1><i class="bi bi-person me-2"></i>{{ titre }}</h1>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}" class="text-white-50">Tableau de bord</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'clients:liste' %}" class="text-white-50">Clients</a></li>
+      <li class="breadcrumb-item active text-white">{{ titre }}</li>
+    </ol></nav>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="form-hotel">
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Prénom <span class="text-danger">*</span></label>
+              {{ form.prenom }}
+              {% if form.prenom.errors %}<div class="invalid-feedback d-block">{{ form.prenom.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nom <span class="text-danger">*</span></label>
+              {{ form.nom }}
+              {% if form.nom.errors %}<div class="invalid-feedback d-block">{{ form.nom.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email <span class="text-danger">*</span></label>
+              {{ form.email }}
+              {% if form.email.errors %}<div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Téléphone <span class="text-danger">*</span></label>
+              {{ form.telephone }}
+              {% if form.telephone.errors %}<div class="invalid-feedback d-block">{{ form.telephone.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">CIN / Passeport</label>
+              {{ form.cin }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nationalité</label>
+              {{ form.nationalite }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Date de naissance</label>
+              {{ form.date_naissance }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Adresse</label>
+              {{ form.adresse }}
+            </div>
+          </div>
+          <hr class="my-4">
+          <div class="d-flex gap-2 justify-content-end">
+            <a href="{% url 'clients:liste' %}" class="btn btn-outline-secondary">
+              <i class="bi bi-x-circle me-1"></i>Annuler
+            </a>
+            <button type="submit" class="btn btn-gold px-4">
+              <i class="bi bi-check-circle me-1"></i>{{ action }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

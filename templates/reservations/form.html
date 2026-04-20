@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}{{ titre }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="page-header">
+    <h1><i class="bi bi-calendar-plus me-2"></i>{{ titre }}</h1>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}" class="text-white-50">Tableau de bord</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'reservations:liste' %}" class="text-white-50">Réservations</a></li>
+      <li class="breadcrumb-item active text-white">{{ titre }}</li>
+    </ol></nav>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <div class="form-hotel">
+        <form method="post" id="reservationForm">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+            <div><i class="bi bi-exclamation-triangle me-2"></i>{{ error }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="row g-3">
+            <!-- Chambre -->
+            <div class="col-md-6">
+              <label class="form-label">Chambre <span class="text-danger">*</span></label>
+              {{ form.chambre }}
+              {% if form.chambre.errors %}<div class="invalid-feedback d-block">{{ form.chambre.errors.0 }}</div>{% endif %}
+            </div>
+            <!-- Client -->
+            <div class="col-md-6">
+              <label class="form-label">Client <span class="text-danger">*</span></label>
+              {{ form.client }}
+              {% if form.client.errors %}<div class="invalid-feedback d-block">{{ form.client.errors.0 }}</div>{% endif %}
+              <div class="mt-1">
+                <a href="{% url 'clients:ajouter' %}" class="text-decoration-none" style="font-size:.82rem;color:var(--gold)">
+                  <i class="bi bi-person-plus me-1"></i>Créer un nouveau client
+                </a>
+              </div>
+            </div>
+
+            <!-- Dates -->
+            <div class="col-md-6">
+              <label class="form-label">Date d'arrivée <span class="text-danger">*</span></label>
+              {{ form.date_checkin }}
+              {% if form.date_checkin.errors %}<div class="invalid-feedback d-block">{{ form.date_checkin.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Date de départ <span class="text-danger">*</span></label>
+              {{ form.date_checkout }}
+              {% if form.date_checkout.errors %}<div class="invalid-feedback d-block">{{ form.date_checkout.errors.0 }}</div>{% endif %}
+            </div>
+
+            <!-- Calcul automatique du prix -->
+            <div class="col-12">
+              <div id="prix-total-display"></div>
+            </div>
+
+            <!-- Statut & Personnes -->
+            <div class="col-md-6">
+              <label class="form-label">Statut</label>
+              {{ form.statut }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nombre de personnes</label>
+              {{ form.nb_personnes }}
+            </div>
+
+            <!-- Notes -->
+            <div class="col-12">
+              <label class="form-label">Notes complémentaires</label>
+              {{ form.notes }}
+            </div>
+          </div>
+
+          <hr class="my-4">
+          <div class="d-flex gap-2 justify-content-end">
+            <a href="{% url 'reservations:liste' %}" class="btn btn-outline-secondary">
+              <i class="bi bi-x-circle me-1"></i>Annuler
+            </a>
+            <button type="submit" class="btn btn-gold px-4">
+              <i class="bi bi-check-circle me-1"></i>{{ action }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Aide -->
+      <div class="card-hotel p-3 mt-3">
+        <h6 class="navy-text mb-2"><i class="bi bi-lightbulb me-2 gold-text"></i>Conseils</h6>
+        <ul class="text-muted small mb-0 ps-3">
+          <li>La disponibilité de la chambre est vérifiée automatiquement.</li>
+          <li>Le prix total est calculé en temps réel selon le nombre de nuits.</li>
+          <li>Le statut peut être modifié à tout moment depuis la fiche réservation.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enrichir le select chambre avec le prix via data-prix
+document.addEventListener('DOMContentLoaded', () => {
+  const select = document.getElementById('id_chambre');
+  if (!select) return;
+  // Charger les prix depuis les options (on les injecte via Django template)
+  const PRIX = {
+    {% for chambre in form.chambre.field.queryset %}
+    "{{ chambre.pk }}": {{ chambre.prix }},
+    {% endfor %}
+  };
+  // Attacher data-prix à chaque option
+  Array.from(select.options).forEach(opt => {
+    if (PRIX[opt.value]) opt.dataset.prix = PRIX[opt.value];
+  });
+});
+</script>
+{% endblock %}

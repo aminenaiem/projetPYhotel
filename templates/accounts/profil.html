@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Mon Profil{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="page-header">
+    <h1><i class="bi bi-person-circle me-2"></i>Mon Profil</h1>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}" class="text-white-50">Tableau de bord</a></li>
+      <li class="breadcrumb-item active text-white">Profil</li>
+    </ol></nav>
+  </div>
+
+  <div class="row g-4">
+    <!-- Carte profil -->
+    <div class="col-lg-4">
+      <div class="card-hotel p-4 text-center">
+        <div class="mx-auto mb-3" style="width:80px;height:80px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:var(--navy);">
+          {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        </div>
+        <h5 class="mb-1">{{ user.get_full_name|default:user.username }}</h5>
+        <span class="badge bg-{% if profile.is_admin %}warning text-dark{% else %}primary{% endif %} mb-3">
+          {{ profile.get_role_display }}
+        </span>
+        <hr>
+        <div class="text-start">
+          <p class="mb-2 small"><i class="bi bi-envelope me-2 gold-text"></i>{{ user.email }}</p>
+          <p class="mb-2 small"><i class="bi bi-phone me-2 gold-text"></i>{{ profile.telephone|default:"Non renseigné" }}</p>
+          <p class="mb-0 small"><i class="bi bi-calendar me-2 gold-text"></i>Membre depuis {{ user.date_joined|date:"d/m/Y" }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulaire de modification -->
+    <div class="col-lg-8">
+      <div class="form-hotel">
+        <h5 class="navy-text mb-4"><i class="bi bi-pencil-square me-2 gold-text"></i>Modifier mes informations</h5>
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Prénom</label>
+              {{ form.first_name }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nom</label>
+              {{ form.last_name }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              {{ form.email }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Téléphone</label>
+              {{ form.telephone }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Photo de profil</label>
+              {{ form.avatar }}
+            </div>
+          </div>
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-gold">
+              <i class="bi bi-check-circle me-1"></i>Enregistrer
+            </button>
+            <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Annuler</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

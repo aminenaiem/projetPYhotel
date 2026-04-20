@@ -1,30 +1,35 @@
 """
-Vues CRUD pour la gestion des chambres (version simplifiée)
+Vues CRUD pour la gestion des chambres
 """
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.db.models import Q
 from .models import Chambre
 from .forms import ChambreForm, RechercheChambresForm
 
+
 def admin_required(view_func):
-    """Décorateur : réserve la vue aux administrateurs (Staff)."""
+    """Décorateur : réserve la vue aux administrateurs."""
     @login_required
     def wrapper(request, *args, **kwargs):
-        if not request.user.is_staff:
+        if not hasattr(request.user, 'profile') or not request.user.profile.is_admin:
             messages.error(request, "Accès réservé aux administrateurs.")
             return redirect('dashboard:index')
         return view_func(request, *args, **kwargs)
     return wrapper
 
+
 @login_required
 def liste_chambres(request):
-    """Liste des chambres avec filtres simples."""
+    """Liste des chambres avec filtres et pagination."""
     chambres = Chambre.objects.all()
     form = RechercheChambresForm(request.GET)
 
     if form.is_valid():
+        if form.cleaned_data.get('type'):
+            chambres = chambres.filter(type=form.cleaned_data['type'])
         if form.cleaned_data.get('prix_min'):
             chambres = chambres.filter(prix__gte=form.cleaned_data['prix_min'])
         if form.cleaned_data.get('prix_max'):
@@ -33,12 +38,12 @@ def liste_chambres(request):
             dispo = form.cleaned_data['disponible'] == '1'
             chambres = chambres.filter(disponible=dispo)
 
-    # Tri simple
+    # Tri
     tri = request.GET.get('tri', 'numero')
-    if tri in ['numero', 'prix', '-prix']:
+    if tri in ['numero', 'prix', '-prix', 'type']:
         chambres = chambres.order_by(tri)
 
-    paginator = Paginator(chambres, 12)
+    paginator = Paginator(chambres, 9)
     page = request.GET.get('page', 1)
     chambres_page = paginator.get_page(page)
 
@@ -48,9 +53,10 @@ def liste_chambres(request):
         'total': paginator.count,
     })
 
+
 @login_required
 def detail_chambre(request, pk):
-    """Détail d'une chambre."""
+    """Détail d'une chambre avec ses réservations."""
     chambre = get_object_or_404(Chambre, pk=pk)
     reservations = chambre.reservation_set.order_by('-date_checkin')[:5]
     return render(request, 'rooms/detail.html', {
@@ -58,15 +64,18 @@ def detail_chambre(request, pk):
         'reservations': reservations,
     })
 
+
 @admin_required
 def ajouter_chambre(request):
-    """Ajouter une chambre."""
+    """Ajouter une nouvelle chambre (admin uniquement)."""
     if request.method == 'POST':
-        form = ChambreForm(request.POST)
+        form = ChambreForm(request.POST, request.FILES)
         if form.is_valid():
             chambre = form.save()
-            messages.success(request, f"Chambre {chambre.numero} ajoutée !")
+            messages.success(request, f"Chambre {chambre.numero} ajoutée avec succès !")
             return redirect('rooms:liste')
+        else:
+            messages.error(request, "Veuillez corriger les erreurs.")
     else:
         form = ChambreForm()
 
@@ -76,33 +85,40 @@ def ajouter_chambre(request):
         'action': 'Ajouter',
     })
 
+
 @admin_required
 def modifier_chambre(request, pk):
-    """Modifier une chambre."""
+    """Modifier une chambre existante (admin uniquement)."""
     chambre = get_object_or_404(Chambre, pk=pk)
+
     if request.method == 'POST':
-        form = ChambreForm(request.POST, instance=chambre)
+        form = ChambreForm(request.POST, request.FILES, instance=chambre)
         if form.is_valid():
             form.save()
-            messages.success(request, f"Chambre {chambre.numero} modifiée !")
+            messages.success(request, f"Chambre {chambre.numero} modifiée avec succès !")
             return redirect('rooms:detail', pk=chambre.pk)
+        else:
+            messages.error(request, "Veuillez corriger les erreurs.")
     else:
         form = ChambreForm(instance=chambre)
 
     return render(request, 'rooms/form.html', {
         'form': form,
         'chambre': chambre,
-        'titre': 'Modifier la chambre',
+        'titre': f'Modifier – Chambre {chambre.numero}',
         'action': 'Enregistrer',
     })
 
+
 @admin_required
 def supprimer_chambre(request, pk):
-    """Supprimer une chambre."""
+    """Supprimer une chambre (admin uniquement)."""
     chambre = get_object_or_404(Chambre, pk=pk)
+
     if request.method == 'POST':
         numero = chambre.numero
         chambre.delete()
         messages.success(request, f"Chambre {numero} supprimée.")
         return redirect('rooms:liste')
+
     return render(request, 'rooms/confirmer_suppression.html', {'chambre': chambre})

@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block title %}Réservations{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h1><i class="bi bi-calendar-check me-2"></i>Réservations</h1>
+        <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}" class="text-white-50">Tableau de bord</a></li>
+          <li class="breadcrumb-item active text-white">{{ total }} réservation{{ total|pluralize }}</li>
+        </ol></nav>
+      </div>
+      <a href="{% url 'reservations:ajouter' %}" class="btn btn-gold">
+        <i class="bi bi-plus-circle me-1"></i>Nouvelle réservation
+      </a>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="card-hotel p-3 mb-4">
+    <form method="GET" class="row g-2 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label small mb-1">Recherche client / chambre</label>
+        <input type="text" name="q" class="form-control" placeholder="Nom, email, numéro chambre..." value="{{ q }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small mb-1">Statut</label>
+        <select name="statut" class="form-select">
+          <option value="">Tous les statuts</option>
+          {% for val, label in statuts %}
+          <option value="{{ val }}" {% if statut_actif == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-gold flex-fill">
+          <i class="bi bi-funnel me-1"></i>Filtrer
+        </button>
+        <a href="{% url 'reservations:liste' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-x-circle"></i>
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Onglets statuts rapides -->
+  <div class="mb-3 d-flex gap-2 flex-wrap">
+    <a href="{% url 'reservations:liste' %}" class="btn btn-sm {% if not statut_actif %}btn-navy{% else %}btn-outline-secondary{% endif %}">
+      Toutes
+    </a>
+    <a href="?statut=en_attente" class="btn btn-sm {% if statut_actif == 'en_attente' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+      En attente
+    </a>
+    <a href="?statut=confirmee" class="btn btn-sm {% if statut_actif == 'confirmee' %}btn-success{% else %}btn-outline-success{% endif %}">
+      Confirmées
+    </a>
+    <a href="?statut=annulee" class="btn btn-sm {% if statut_actif == 'annulee' %}btn-danger{% else %}btn-outline-danger{% endif %}">
+      Annulées
+    </a>
+    <a href="?statut=terminee" class="btn btn-sm {% if statut_actif == 'terminee' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+      Terminées
+    </a>
+  </div>
+
+  <!-- Tableau -->
+  <div class="card-hotel">
+    <div class="p-0">
+      <table class="table table-hotel mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Client</th>
+            <th>Chambre</th>
+            <th>Arrivée</th>
+            <th>Départ</th>
+            <th>Nuits</th>
+            <th>Total MAD</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in reservations %}
+          <tr>
+            <td>
+              <a href="{% url 'reservations:detail' r.pk %}" class="gold-text fw-bold text-decoration-none">#{{ r.pk }}</a>
+            </td>
+            <td>
+              <a href="{% url 'clients:detail' r.client.pk %}" class="text-decoration-none text-dark fw-500">
+                {{ r.client.nom_complet }}
+              </a>
+              <div class="text-muted" style="font-size:.78rem">{{ r.client.email }}</div>
+            </td>
+            <td>
+              <a href="{% url 'rooms:detail' r.chambre.pk %}" class="text-decoration-none">
+                <span class="badge" style="background:var(--navy);color:var(--gold)">{{ r.chambre.numero }}</span>
+                <span class="text-muted small d-block">{{ r.chambre.get_type_display }}</span>
+              </a>
+            </td>
+            <td>{{ r.date_checkin|date:"d/m/Y" }}</td>
+            <td>{{ r.date_checkout|date:"d/m/Y" }}</td>
+            <td><span class="badge bg-secondary">{{ r.nb_nuits }}n</span></td>
+            <td class="fw-bold">{{ r.prix_total|floatformat:0 }}</td>
+            <td><span class="badge bg-{{ r.badge_statut }}">{{ r.get_statut_display }}</span></td>
+            <td>
+              <div class="d-flex gap-1">
+                <a href="{% url 'reservations:detail' r.pk %}" class="btn btn-sm btn-outline-primary"
+                   data-bs-toggle="tooltip" title="Détails">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <a href="{% url 'reservations:modifier' r.pk %}" class="btn btn-sm btn-outline-secondary"
+                   data-bs-toggle="tooltip" title="Modifier">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <a href="{% url 'reservations:supprimer' r.pk %}" class="btn btn-sm btn-outline-danger"
+                   data-bs-toggle="tooltip" title="Supprimer">
+                  <i class="bi bi-trash"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" class="text-center py-5 text-muted">
+              <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>Aucune réservation trouvée
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  {% if reservations.has_other_pages %}
+  <nav class="mt-4 d-flex justify-content-center">
+    <ul class="pagination">
+      {% if reservations.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ reservations.previous_page_number }}&statut={{ statut_actif }}&q={{ q }}"><i class="bi bi-chevron-left"></i></a></li>
+      {% endif %}
+      {% for num in reservations.paginator.page_range %}
+      <li class="page-item {% if reservations.number == num %}active{% endif %}">
+        <a class="page-link" href="?page={{ num }}&statut={{ statut_actif }}&q={{ q }}">{{ num }}</a>
+      </li>
+      {% endfor %}
+      {% if reservations.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ reservations.next_page_number }}&statut={{ statut_actif }}&q={{ q }}"><i class="bi bi-chevron-right"></i></a></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

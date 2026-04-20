@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}Clients{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h1><i class="bi bi-people me-2"></i>Clients</h1>
+        <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}" class="text-white-50">Tableau de bord</a></li>
+          <li class="breadcrumb-item active text-white">{{ total }} client{{ total|pluralize }}</li>
+        </ol></nav>
+      </div>
+      <a href="{% url 'clients:ajouter' %}" class="btn btn-gold">
+        <i class="bi bi-person-plus me-1"></i>Nouveau client
+      </a>
+    </div>
+  </div>
+
+  <!-- Recherche -->
+  <div class="card-hotel p-3 mb-4">
+    <form method="GET" class="d-flex gap-2">
+      <input type="text" name="q" class="form-control" placeholder="Rechercher par nom, email, téléphone..." value="{{ q }}">
+      <button type="submit" class="btn btn-gold px-4">
+        <i class="bi bi-search me-1"></i>Rechercher
+      </button>
+      {% if q %}<a href="{% url 'clients:liste' %}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i></a>{% endif %}
+    </form>
+  </div>
+
+  <!-- Tableau -->
+  <div class="card-hotel">
+    <div class="p-0">
+      <table class="table table-hotel mb-0">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Nationalité</th>
+            <th>Réservations</th>
+            <th>Inscrit le</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for client in clients %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div style="width:36px;height:36px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--navy);flex-shrink:0">
+                  {{ client.prenom|first }}{{ client.nom|first }}
+                </div>
+                <div>
+                  <a href="{% url 'clients:detail' client.pk %}" class="text-decoration-none fw-bold text-dark">
+                    {{ client.nom_complet }}
+                  </a>
+                  {% if client.cin %}
+                  <div class="text-muted" style="font-size:.78rem">{{ client.cin }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+            <td>
+              <a href="mailto:{{ client.email }}" class="text-decoration-none text-muted">
+                <i class="bi bi-envelope me-1"></i>{{ client.email }}
+              </a>
+            </td>
+            <td>{{ client.telephone }}</td>
+            <td>{{ client.nationalite|default:"—" }}</td>
+            <td>
+              <span class="badge" style="background:var(--navy);color:var(--gold)">
+                {{ client.nb_reservations }}
+              </span>
+            </td>
+            <td class="text-muted small">{{ client.created_at|date:"d/m/Y" }}</td>
+            <td>
+              <div class="d-flex gap-1">
+                <a href="{% url 'clients:detail' client.pk %}" class="btn btn-sm btn-outline-primary"
+                   data-bs-toggle="tooltip" title="Voir profil">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <a href="{% url 'clients:modifier' client.pk %}" class="btn btn-sm btn-outline-secondary"
+                   data-bs-toggle="tooltip" title="Modifier">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <a href="{% url 'reservations:ajouter' %}?client={{ client.pk }}" class="btn btn-sm btn-outline-success"
+                   data-bs-toggle="tooltip" title="Nouvelle réservation">
+                  <i class="bi bi-calendar-plus"></i>
+                </a>
+                <a href="{% url 'clients:supprimer' client.pk %}" class="btn btn-sm btn-outline-danger"
+                   data-bs-toggle="tooltip" title="Supprimer">
+                  <i class="bi bi-trash"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="bi bi-people fs-2 d-block mb-2"></i>
+              Aucun client{% if q %} correspondant à « {{ q }} »{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  {% if clients.has_other_pages %}
+  <nav class="mt-4 d-flex justify-content-center">
+    <ul class="pagination">
+      {% if clients.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ clients.previous_page_number }}&q={{ q }}"><i class="bi bi-chevron-left"></i></a></li>
+      {% endif %}
+      {% for num in clients.paginator.page_range %}
+      <li class="page-item {% if clients.number == num %}active{% endif %}">
+        <a class="page-link" href="?page={{ num }}&q={{ q }}">{{ num }}</a>
+      </li>
+      {% endfor %}
+      {% if clients.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ clients.next_page_number }}&q={{ q }}"><i class="bi bi-chevron-right"></i></a></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

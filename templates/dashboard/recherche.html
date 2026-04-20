@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Recherche – {{ q }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="page-header">
+    <h1><i class="bi bi-search me-2"></i>Résultats de recherche</h1>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item active text-white">
+        {% if q %}« {{ q }} » – {{ total }} résultat{{ total|pluralize }}{% else %}Entrez un terme{% endif %}
+      </li>
+    </ol></nav>
+  </div>
+
+  <!-- Formulaire de recherche étendu -->
+  <div class="card-hotel p-3 mb-4">
+    <form method="GET" action="{% url 'dashboard:recherche' %}" class="d-flex gap-2">
+      <input type="search" name="q" value="{{ q }}" class="form-control"
+             placeholder="Rechercher chambre, client, réservation..." autofocus>
+      <button type="submit" class="btn btn-gold px-4">
+        <i class="bi bi-search me-1"></i>Rechercher
+      </button>
+    </form>
+  </div>
+
+  {% if q %}
+    {% if total == 0 %}
+    <div class="text-center py-5">
+      <i class="bi bi-search fs-1 text-muted"></i>
+      <h5 class="mt-3 text-muted">Aucun résultat pour « {{ q }} »</h5>
+      <p class="text-muted">Essayez avec d'autres mots-clés.</p>
+    </div>
+    {% endif %}
+
+    <!-- Chambres -->
+    {% if resultats.chambres %}
+    <div class="search-result-section">
+      <h5 class="navy-text mb-3">
+        <i class="bi bi-door-closed gold-text me-2"></i>
+        Chambres <span class="badge" style="background:var(--gold);color:var(--navy)">{{ resultats.chambres|length }}</span>
+      </h5>
+      {% for c in resultats.chambres %}
+      <a href="{% url 'rooms:detail' c.pk %}" class="search-result-item">
+        <div class="stat-icon" style="background:rgba(26,26,46,.08);width:40px;height:40px;border-radius:8px;flex-shrink:0">
+          <i class="bi bi-door-closed gold-text"></i>
+        </div>
+        <div class="flex-grow-1">
+          <div class="fw-bold">Chambre {{ c.numero }} – {{ c.get_type_display }}</div>
+          <div class="text-muted small">{{ c.prix }} MAD/nuit | Étage {{ c.etage }} | {{ c.capacite }} pers.</div>
+        </div>
+        <span class="badge bg-{{ c.statut_badge }}">{{ c.statut_label }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Réservations -->
+    {% if resultats.reservations %}
+    <div class="search-result-section">
+      <h5 class="navy-text mb-3">
+        <i class="bi bi-calendar-check gold-text me-2"></i>
+        Réservations <span class="badge" style="background:var(--gold);color:var(--navy)">{{ resultats.reservations|length }}</span>
+      </h5>
+      {% for r in resultats.reservations %}
+      <a href="{% url 'reservations:detail' r.pk %}" class="search-result-item">
+        <div class="stat-icon" style="background:rgba(0,123,255,.08);width:40px;height:40px;border-radius:8px;flex-shrink:0">
+          <i class="bi bi-calendar2-check" style="color:#007bff"></i>
+        </div>
+        <div class="flex-grow-1">
+          <div class="fw-bold">#{{ r.pk }} – {{ r.client.nom_complet }}</div>
+          <div class="text-muted small">
+            Chambre {{ r.chambre.numero }} | {{ r.date_checkin|date:"d/m/Y" }} → {{ r.date_checkout|date:"d/m/Y" }}
+            | {{ r.prix_total|floatformat:0 }} MAD
+          </div>
+        </div>
+        <span class="badge bg-{{ r.badge_statut }}">{{ r.get_statut_display }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Clients -->
+    {% if resultats.clients %}
+    <div class="search-result-section">
+      <h5 class="navy-text mb-3">
+        <i class="bi bi-person gold-text me-2"></i>
+        Clients <span class="badge" style="background:var(--gold);color:var(--navy)">{{ resultats.clients|length }}</span>
+      </h5>
+      {% for c in resultats.clients %}
+      <a href="{% url 'clients:detail' c.pk %}" class="search-result-item">
+        <div class="stat-icon" style="background:rgba(40,167,69,.08);width:40px;height:40px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--navy)">
+          {{ c.prenom|first }}{{ c.nom|first }}
+        </div>
+        <div class="flex-grow-1">
+          <div class="fw-bold">{{ c.nom_complet }}</div>
+          <div class="text-muted small">{{ c.email }} | {{ c.telephone }}</div>
+        </div>
+        <span class="badge bg-secondary">{{ c.nb_reservations }} rés.</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-search fs-1"></i>
+    <p class="mt-3">Entrez un terme pour rechercher dans toute la base de données.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
